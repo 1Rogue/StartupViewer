@@ -6,5 +6,13 @@ version: ${project.version}
 author: 1Rogue
 website: https://github.com/1Rogue
 commands:
-  printlog:
-    permission: startupviewer.print
+  startup:
+    default: true
+    description: Main command for StartupViewer
+permissions:
+  startupviewer.*:
+    default: op
+    description: Grants all permissions for StartupViewer
+    children:
+      startupviewer.print: true
+      startupviewer.view: true
