@@ -1,10 +1,10 @@
 main: com.rogue.startupviewer.StartupViewer
 name: ${project.name}
 prefix: StartupViewer
-description: 1Rogue is a dummy and didn't fix his own template
+description: Simple project for displaying command-line arguments for the server
 version: ${project.version}
 author: 1Rogue
-website: https://github.com/1Rogue
+website: https://1rogue.com/
 commands:
   startup:
     default: true

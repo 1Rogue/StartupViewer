@@ -36,29 +36,19 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.java.JavaPlugin;
 
 /**
+ * Main class for StartupViewer
  *
- * @since 1.0
+ * @since 1.0.0
  * @author 1Rogue
- * @version 1.0
- *
+ * @version 1.0.0
  */
 public class StartupViewer extends JavaPlugin {
 
     /**
-     * No use yet
+     * Enables metrics
      *
-     * @since 1.0
-     * @version 1.0
-     */
-    @Override
-    public void onLoad() {
-    }
-
-    /**
-     * Enables stuff
-     *
-     * @since 1.0
-     * @version 1.0
+     * @since 1.0.0
+     * @version 1.0.0
      */
     @Override
     public void onEnable() {
@@ -67,27 +57,22 @@ public class StartupViewer extends JavaPlugin {
             getLogger().info("Enabling Metrics...");
             metrics.start();
         } catch (IOException ex) {
-            Logger.getLogger(StartupViewer.class.getName()).log(Level.SEVERE, null, ex);
+            this.getLogger().log(Level.SEVERE, "Error starting metrics!", ex);
         }
 
     }
 
     /**
-     * No use yet.
-     *
-     * @since 1.0
-     * @version 1.0
-     */
-    @Override
-    public void onDisable() {
-        this.getLogger().log(Level.INFO, "{0} is disabled!", this.getName());
-    }
-
-    /**
      * Made to print a report on the server info
      *
-     * @since 1.0
-     * @version 1.0
+     * @since 1.0.0
+     * @version 1.0.0
+     *
+     * @param sender The command executor
+     * @param cmd The command being executed
+     * @param label The actual command used
+     * @param args Command arguments
+     * @return true when handled correctly
      */
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
@@ -97,66 +82,118 @@ public class StartupViewer extends JavaPlugin {
                 List<String> arguments = RuntimemxBean.getInputArguments();
                 StringBuilder sb = new StringBuilder("Arguments: ");
                 for (String arg : arguments) {
-                    sb.append(arg).append(" ");
+                    sb.append("&9").append(arg).append("&f, ");
                 }
+                String out = __(sb.substring(0, sb.length() - 2));
                 if (args[0].equalsIgnoreCase("print") && sender.hasPermission("startupviewer.print")) {
-                    DateFormat dateFormat = new SimpleDateFormat("MM-dd-YY--HH-mm-ss");
-                    Date date = new Date();
-                    String filename = this.getDataFolder() + File.separator + "startup--" + dateFormat.format(date) + ".txt";
-
-                    if (!this.getDataFolder().exists()) {
-                        this.getDataFolder().mkdir();
-                    }
-
-                    File file = new File(filename);
-
-                    try {
-                        if (!file.exists()) {
-                            file.createNewFile();
-                        }
-                    } catch (IOException ex) {
-                        Logger.getLogger(StartupViewer.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                    try {
-                        BufferedWriter out = new BufferedWriter(new FileWriter(filename));
-                        out.write(sb.toString());
-                        out.close();
-                    } catch (IOException ex) {
-                        Logger.getLogger(StartupViewer.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                    return true;
+                    return this.printReport(sender, this.stripColor(out));
                 } else if (args[0].equalsIgnoreCase("view") && sender.hasPermission("startupviewer.view")) {
-                    sender.sendMessage(sb.toString());
+                    sender.sendMessage(out);
                     return true;
+                } else if (args[0].equalsIgnoreCase("view") || args[0].equalsIgnoreCase("print")) {
+                    this.communicate(sender, "&cYou do not have permission for that!");
                 }
-            } else if (args.length == 0) {
-                sender.sendMessage(_("[&9StartupViewer&f] v&a" + this.getDescription().getVersion() + "&f, made by &e1Rogue"));
-                return true;
             }
-            return false;
+            this.communicate(sender, "v&a" + this.getDescription().getVersion() + "&f, made by &91Rogue");
+            sender.sendMessage(__("Commands: &9view&f, &9print"));
+            return true;
         }
         return false;
     }
 
     /**
-     * Gets the instance of the plugin in its entirety.
-     *
-     * @since 1.0
-     * @version 1.0
-     *
-     * @return The plugin instance
-     */
-    public static StartupViewer getPlugin() {
-        return (StartupViewer) Bukkit.getServer().getPluginManager().getPlugin("StartupViewer");
-    }
-
-    /**
      * Converts pre-made strings to have chat colors in them
+     *
+     * @since 1.0.0
+     * @version 1.0.0
      *
      * @param encoded String with unconverted color codes
      * @return string with correct chat colors included
      */
-    public static String _(String encoded) {
+    public String __(String encoded) {
         return ChatColor.translateAlternateColorCodes('&', encoded);
+    }
+
+    /**
+     * Strips color from an encoded string
+     *
+     * @since 1.0.0
+     * @version 1.0.0
+     *
+     * @param encoded
+     * @return
+     */
+    private String stripColor(String encoded) {
+        System.out.println("Stripcolor before = " + encoded);
+        String back = ChatColor.stripColor(encoded);
+        System.out.println("Stripcolor after = " + back);
+        return back;
+    }
+
+    /**
+     * Sends a message in the context of the plugin
+     *
+     * @since 1.0.0
+     * @version 1.0.0
+     *
+     * @param target The target to send to
+     * @param send The message to send
+     */
+    private void communicate(CommandSender target, String send) {
+        target.sendMessage(__("[&9StartupViewer&f] " + send));
+    }
+
+    /**
+     * Prints the command-line arguments to a file
+     *
+     * @since 1.0.0
+     * @version 1.0.0
+     *
+     * @param sender The command sender (used for messages)
+     * @param write The report to write
+     * @return True if written to file, false otherwise
+     */
+    public boolean printReport(CommandSender sender, String write) {
+        boolean success = true;
+
+        System.out.println("write = " + write);
+        DateFormat dateFormat = new SimpleDateFormat("MM-dd-YY--HH-mm-ss");
+        Date date = new Date();
+        String filename = "startup--" + dateFormat.format(date) + ".txt";
+
+        if (!this.getDataFolder().exists()) {
+            this.getDataFolder().mkdir();
+        }
+
+        File file = new File(this.getDataFolder(), filename);
+
+        BufferedWriter out = null;
+        FileWriter fw = null;
+        try {
+            if (!file.exists()) {
+                file.createNewFile();
+            }
+            fw = new FileWriter(file);
+            out = new BufferedWriter(fw);
+            out.write(write);
+        } catch (IOException ex) {
+            this.communicate(sender, "&cError writing arguments to file!");
+            this.getLogger().log(Level.SEVERE, "Error writing arguments to file!", ex);
+            success = false;
+        } finally {
+            try {
+                if (out != null) {
+                    out.close();
+                }
+                if (fw != null) {
+                    fw.close();
+                }
+            } catch (IOException ex) {
+                this.communicate(sender, "&cError closing file streams!");
+                this.getLogger().log(Level.SEVERE, "Error closing file streams!", ex);
+            }
+        }
+
+        return success;
     }
 }
