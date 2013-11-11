@@ -1,7 +1,7 @@
 main: com.rogue.startupviewer.StartupViewer
 name: ${project.name}
 prefix: StartupViewer
-description: Simple project for displaying command-line arguments for the server
+description: Plugin or displaying command-line arguments for the server
 version: ${project.version}
 author: 1Rogue
 website: https://1rogue.com/
