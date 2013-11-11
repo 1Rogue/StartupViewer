@@ -150,8 +150,7 @@ public class StartupViewer extends JavaPlugin {
      */
     private boolean printReport(CommandSender sender, String write) {
         boolean success = true;
-
-        System.out.println("write = " + write);
+        
         DateFormat dateFormat = new SimpleDateFormat("MM-dd-YY--HH-mm-ss");
         Date date = new Date();
         String filename = "startup--" + dateFormat.format(date) + ".txt";
