@@ -28,8 +28,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
-import java.util.logging.Logger;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -88,14 +86,14 @@ public class StartupViewer extends JavaPlugin {
                 if (args[0].equalsIgnoreCase("print") && sender.hasPermission("startupviewer.print")) {
                     return this.printReport(sender, this.stripColor(out));
                 } else if (args[0].equalsIgnoreCase("view") && sender.hasPermission("startupviewer.view")) {
-                    sender.sendMessage(out);
+                    this.communicate(sender, out);
                     return true;
                 } else if (args[0].equalsIgnoreCase("view") || args[0].equalsIgnoreCase("print")) {
                     this.communicate(sender, "&cYou do not have permission for that!");
                 }
             }
             this.communicate(sender, "v&a" + this.getDescription().getVersion() + "&f, made by &91Rogue");
-            sender.sendMessage(__("Commands: &9view&f, &9print"));
+            this.communicate(sender, "Commands: &9view&f, &9print");
             return true;
         }
         return false;
@@ -110,7 +108,7 @@ public class StartupViewer extends JavaPlugin {
      * @param encoded String with unconverted color codes
      * @return string with correct chat colors included
      */
-    public String __(String encoded) {
+    private String __(String encoded) {
         return ChatColor.translateAlternateColorCodes('&', encoded);
     }
 
@@ -124,10 +122,7 @@ public class StartupViewer extends JavaPlugin {
      * @return
      */
     private String stripColor(String encoded) {
-        System.out.println("Stripcolor before = " + encoded);
-        String back = ChatColor.stripColor(encoded);
-        System.out.println("Stripcolor after = " + back);
-        return back;
+        return ChatColor.stripColor(encoded);
     }
 
     /**
@@ -153,7 +148,7 @@ public class StartupViewer extends JavaPlugin {
      * @param write The report to write
      * @return True if written to file, false otherwise
      */
-    public boolean printReport(CommandSender sender, String write) {
+    private boolean printReport(CommandSender sender, String write) {
         boolean success = true;
 
         System.out.println("write = " + write);
@@ -170,9 +165,6 @@ public class StartupViewer extends JavaPlugin {
         BufferedWriter out = null;
         FileWriter fw = null;
         try {
-            if (!file.exists()) {
-                file.createNewFile();
-            }
             fw = new FileWriter(file);
             out = new BufferedWriter(fw);
             out.write(write);
